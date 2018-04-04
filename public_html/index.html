@@ -91,7 +91,7 @@ Creative Commons Namensnennung 4.0 International Lizenz.
         </div>
 
         <script>
-            alert("Die Refernzdokumentation für Paho-JavaScript gibt es hier:\n\nhttp://www.eclipse.org/paho/files/jsdoc/Paho.MQTT.Client.html");
+            //alert("Die Refernzdokumentation für Paho-JavaScript gibt es hier:\n\nhttp://www.eclipse.org/paho/files/jsdoc/Paho.MQTT.Client.html");
 
             /**
              * Hauptklasse für unser schönes, kleines Dashboard. :-)
@@ -166,21 +166,27 @@ Creative Commons Namensnennung 4.0 International Lizenz.
                     this.mqttClient.onMessageArrived = message => this.onMessageArrived(message);
 
                     let connectOptions = {
-                        onSuccess: () => this.onConnect(),
+                            onSuccess: () => this.onConnect(),
                         onFailure: (ctx, code, message) => this.onDisconnect({
-                                errorCode: code,
-                                errorMessage: message
-                            })
-                    };
+                        errorCode: code,
+                        errorMessage: message
+                    })
+                };
 
                     // TODO: Verbindung herstellen
+
+                    this.mqttClient.connect(connectOptions);
+
                 }
 
                 /**
                  * Verbindung trennen.
                  */
                 disconnect() {
+
                     // TODO: Verbindung trennen
+
+                    this.mqttClient.disconnect()
                 }
 
                 /**
@@ -196,7 +202,7 @@ Creative Commons Namensnennung 4.0 International Lizenz.
 
                 /**
                  * Die Verbindung wurde getrennt. Rühren, Soldat!
-                 * 
+                 *
                  * @param {Object] responseObject Objekt mit eventueller Fehlermeldung
                  */
                 onDisconnect(responseObject) {
@@ -213,20 +219,33 @@ Creative Commons Namensnennung 4.0 International Lizenz.
                 /**
                  * Eine Nachricht wurde empfangen. Daten in den Schaubildern
                  * daher aktualisieren, um ihre Inhalte sichtbar zu machen.
-                 * 
+                 *
                  * @param {Object} mqttMessage Empfangene Nachricht
                  */
                 onMessageArrived(mqttMessage) {
                     let message = JSON.parse(mqttMessage.payloadString);
 
                     // TODO: Anzeige aktualisieren
-                    //
+
                     // Hierfür muss der im JSON mitgesendete Nachrichtentyp
                     // ausgewertet werden.
-                    // 
+                    //
                     // VEHICLE_READY: this.addVehicle(message) aufrufen
-                    // CONNECTION_LIST: this.removeVehicle(message) aufrufen
+                    // CONNECTION_LOST: this.removeVehicle(message) aufrufen
                     // SENSOR_DATA: this.updateVehicle(message) aufrufen
+
+                    switch (message.type) {
+                        case "VEHICLE_READY":
+                            this.addVehicle(message);
+                            break;
+                        case "CONNECTION_LOST":
+                            this.removeVehicle(message);
+                            break;
+                        case "SENSOR_DATA":
+                            this.updateVehicle(message);
+                            break;
+                        default: break;
+                    }
                 }
 
                 /**
